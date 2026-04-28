@@ -62,6 +62,23 @@ def generate_step():
             eastwall[curr_i - 1][curr_j] = 0
         elif direction == 'W':
             eastwall[curr_i - 1][curr_j - 1] = 0
+        
+        if random.randint(1,20) ==1:
+            extra_dirs = []
+            if curr_i < R: extra_dirs.append('N')
+            if curr_i >1: extra_dirs.append('S')
+            if curr_j <C: extra_dirs.append('E')
+            if curr_j >1: extra_dirs.append('W')
+            if extra_dirs:
+                rogue_dir = random.choice(extra_dirs)
+                if rogue_dir == 'N':
+                    northwall[curr_i][curr_j -1] = 0
+                elif rogue_dir =='S':
+                    northwall[curr_i -1][curr_j -1] =0
+                elif rogue_dir == 'E':
+                    eastwall[curr_i-1][curr_j] = 0
+                elif rogue_dir == 'W':
+                    eastwall[curr_i -1][curr_j -1] =0
         curr_i, curr_j = next_i, next_j
         visited[curr_i][curr_j] = True
     elif stack:
