@@ -29,10 +29,10 @@ def draw_grid():
                 glVertex2f(x,y)
                 glVertex2f(x, y+CELL_SIZE)
     glEnd()
-def draw_mouse():
-    x = (curr_j -1)*CELL_SIZE - (C*CELL_SIZE/2)
-    y = (curr_i -1)*CELL_SIZE - (R*CELL_SIZE/2)
-    glColor3f(1,0,0)
+def draw_mouse(mi, mj, color):
+    x = (mj -1)*CELL_SIZE - (C*CELL_SIZE/2)
+    y = (mi -1)*CELL_SIZE - (R*CELL_SIZE/2)
+    glColor3f(*color)
     glBegin(GL_QUADS)
     p = 0.2
     glVertex2f(x+p, y+p)
@@ -85,6 +85,46 @@ def generate_step():
         curr_i, curr_j = stack.pop()
     else:
         generating = False
+        setup_solver()
+solving = False
+solve_visited = [[False for _ in range(C+1)] for _ in range(R+1)]
+solve_stack = []
+solve_i, solve_j = 1,1
+solve_visited[solve_i][solve_j] = True
+path = []
+def setup_solver():
+    global solving
+    solving = True
+    solve_stack.append((solve_i, solve_j))
+def solve_step():
+    global solve_i, solve_j, solving
+    if solve_i ==R and solve_j ==C:
+        solving = False
+        return
+    neighbours = []
+    if solve_i < R and northwall[solve_i][solve_j -1] ==0 and not solve_visited[solve_i +1][solve_j]:
+        neighbours.append((solve_i +1, solve_j))
+    if solve_i >1 and northwall[solve_i -1][solve_j -1] ==0 and not solve_visited[solve_i -1][solve_j]:
+        neighbours.append((solve_i -1, solve_j))
+    if solve_j <C and eastwall[solve_i -1][solve_j] ==0 and not solve_visited[solve_i][solve_j +1]:
+        neighbours.append((solve_i, solve_j +1))
+    if solve_j >1 and eastwall[solve_i -1][solve_j-1]==0 and not solve_visited[solve_i][solve_j -1]:
+        neighbours.append((solve_i, solve_j-1))
+    if neighbours:
+        solve_stack.append((solve_i, solve_j))
+        solve_i, solve_j = neighbours[0]
+        solve_visited[solve_i][solve_j] = True
+    elif solve_stack:
+        solve_i, solve_j = solve_stack.pop()
+def draw_path():
+    glColor3f(0,0,1)
+    glPointSize(5)
+    glBegin(GL_POINTS)
+    for (si, sj) in solve_stack:
+        x=(sj -1)*CELL_SIZE - (C*CELL_SIZE/2)+ (CELL_SIZE/2)
+        y=(si -1)*CELL_SIZE - (R*CELL_SIZE/2)+ (CELL_SIZE/2)
+        glVertex2f(x,y)
+    glEnd()
 def main():
     pygame.init()
     display = (1000, 800)
@@ -100,11 +140,17 @@ def main():
                 return
         if generating:
             generate_step()
+        elif solving:
+            solve_step()
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
         draw_grid()
         if generating:
-            draw_mouse()
+            draw_mouse(curr_i, curr_j, (1,0,0))
+        if not generating:
+            draw_path()
+            if solving:
+                draw_mouse(solve_i, solve_j, (1,0,0))
         pygame.display.flip()
-        clock.tick(60)
+        clock.tick(20)
 if __name__ == "__main__":
     main()
