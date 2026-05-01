@@ -17,4 +17,12 @@ the GOAL here is to transform a solid grid into a navigable maze using a randomi
       -> if the mouse hit a dead end, it uses the stack to backtrack to last cell with unvisited neighbours.
     => ROGUE logic(cycle):
       -> moving beyond a simple SPANNING TREE maze, a (1 in 20) chance was added for the mouse to eat an extra wall during movement. this creates cycle/ loops which defeat the simple wall following solvers.
-      
+
+## SOLVR and pathfinding logic
+now with the maze generated, a second mouse was created to find the path from entrance to exit.
+=> MOVEMENT = unlike the generator mouse, the solver mouse can only move between cells if the wall between them has been eaten.
+=> SEARCH STRATEGY = utilized a second stack-based DFS to explore the maze from the bottom-left entrance to the top-right exit.
+=> STATE MANAGEMENT = to prevent the solver from getting lost in the rogue or loop cycle, it maintain ITS OWN solve_visited matrix.
+=> VISUAL:
+    -> current path = rendering as blue dots(GL_POINTS) using the coordinates currently stored in the solve_stack.
+    -> Backtracking = when the solver backtracks the dots are removed from the screen(meaning they popped from the stack), ensuring only the ACTIEV path is highlighted. 
