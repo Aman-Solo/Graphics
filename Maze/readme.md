@@ -1,3 +1,5 @@
+## Building and Running mazes.
+
 ## Rendering engine and data visualization for 2D maze visualized in 3D OpenGL environment.
 1 => //Maze logic// = relies on two 2D matrices that track which wall are currently standing
         Northwall: store the presence of horizontal walls
