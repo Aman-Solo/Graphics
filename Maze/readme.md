@@ -1,6 +1,6 @@
 ## Building and Running mazes.
 
-## Rendering engine and data visualization for 2D maze visualized in 3D OpenGL environment.
+## 1) Rendering engine and data visualization for 2D maze visualized in 3D OpenGL environment.
 1 => //Maze logic// = relies on two 2D matrices that track which wall are currently standing
         Northwall: store the presence of horizontal walls
         eastwall: stores the presence of vertical walls
@@ -10,7 +10,7 @@
     primitive assembly: uses GL_LINES to draw horizontal(northwall) and vertical(eastwall) segments only where the matrice value is 1.
 3 => 3D projection: gluPerspective establishes a 3D field of view and glTranslate sets the camera distance, so these 2 allow the 2D grid to be viewed within a 3D space.
         
-## Maze generation (The eater mouth)
+## 2) Maze generation (The eater mouth)
 the GOAL here is to transform a solid grid into a navigable maze using a randomized traversal algorithm.
 => the ALGORITHM implemented a depth first search(DFS) using stack data structure.
 => the EATING MECHANISM:
@@ -20,7 +20,7 @@ the GOAL here is to transform a solid grid into a navigable maze using a randomi
     => ROGUE logic(cycle):
       -> moving beyond a simple SPANNING TREE maze, a (1 in 20) chance was added for the mouse to eat an extra wall during movement. this creates cycle/ loops which defeat the simple wall following solvers.
 
-## SOLVR and pathfinding logic
+## 3) SOLVR and pathfinding logic
 now with the maze generated, a second mouse was created to find the path from entrance to exit.
 => MOVEMENT = unlike the generator mouse, the solver mouse can only move between cells if the wall between them has been eaten.
 => SEARCH STRATEGY = utilized a second stack-based DFS to explore the maze from the bottom-left entrance to the top-right exit.
