@@ -5,8 +5,15 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 R, C = 20, 25
 CELL_SIZE = 1
+
+# DATA STRUCTURES REQUIRMENTS
+# About the wall integrity: if northwall [i][j] is 1, the ij-th wall cell has a solid upper wall, otherwise the wall is missing.
+# The Bottom Edge: The zeroth row is a phantom row of cells below the maze whose north walls make up the bottom edge of the maze.
 northwall = [[1 for _ in range(C+1)] for _ in range(R+1)]
+
+# the Left Edge: similarly, eastwall[i][0] specifies where any gaps appear in the left edge of the maze.
 eastwall = [[1 for _ in range(C+1)] for _ in range(R+1)]
+
 visited = [[False for _ in range(C+1)] for _ in range(R+1)]
 eastwall[0][0] = 0
 eastwall[R-1][C] = 0
@@ -40,9 +47,15 @@ def draw_mouse(mi, mj, color):
     glVertex2f(x+CELL_SIZE-p, y+CELL_SIZE-p)
     glVertex2f(x+p, y+CELL_SIZE-p)
     glEnd()
+
+# THE MAZE GENERATION LOGIC
+# The mouse randomely eats through walls to connect adjacent cells.
+# and we use stack for the DFS generation.
 def generate_step():
     global curr_i, curr_j, generating
     neighbours = []
+
+    # this part checks the four neighbour cells which are above, below, left and right for unvisited candidates.
     if curr_i < R and not visited[curr_i +1][curr_j]:
         neighbours.append(('N', curr_i +1, curr_j))
     if curr_i > 1 and not visited[curr_i -1][curr_j]:
@@ -52,8 +65,11 @@ def generate_step():
     if curr_j >1 and not visited[curr_i][curr_j -1]:
         neighbours.append(('W', curr_i, curr_j -1))
     if neighbours:
-        direction, next_i, next_j = random.choice(neighbours)
-        stack.append((curr_i, curr_j))
+        # 1. this chooses one candidate randomely and eat through the connecting wall.
+        direction, next_i, next_j = random.choice(neighbours) 
+        stack.append((curr_i, curr_j)) # saving the layout location of the remaining candidates on a stack.
+        
+        # 2. this part is for the wall that is eaten and that it will be erased (set to zero).
         if direction == 'N':
             northwall[curr_i][curr_j - 1] = 0
         elif direction == 'S':
@@ -62,7 +78,10 @@ def generate_step():
             eastwall[curr_i - 1][curr_j] = 0
         elif direction == 'W':
             eastwall[curr_i - 1][curr_j - 1] = 0
-        
+
+        # CHALLENGE / ADDENDUM BONUS
+        # i in 20 times, eat an extra wall.
+        # this creates cycles that encircle the ending cell and defeat the shoulder to wall maze solving method.
         if random.randint(1,20) ==1:
             extra_dirs = []
             if curr_i < R: extra_dirs.append('N')
@@ -81,8 +100,11 @@ def generate_step():
                     eastwall[curr_i -1][curr_j -1] =0
         curr_i, curr_j = next_i, next_j
         visited[curr_i][curr_j] = True
+    
+    # 3. this is when trapped in a dead end (like surrounded by visited cells), pop unvisited cell and continue.
     elif stack:
         curr_i, curr_j = stack.pop()
+    # 4. when stack is empty, all cells have been visited, so maze is complete.
     else:
         generating = False
         setup_solver()
@@ -96,6 +118,8 @@ def setup_solver():
     global solving
     solving = True
     solve_stack.append((solve_i, solve_j))
+
+# RUNNING THE MAZE (BACKTRACKING ALGORITHM)
 def solve_step():
     global solve_i, solve_j, solving
     if solve_i ==R and solve_j ==C:
@@ -111,10 +135,13 @@ def solve_step():
     if solve_j >1 and eastwall[solve_i -1][solve_j-1]==0 and not solve_visited[solve_i][solve_j -1]:
         neighbours.append((solve_i, solve_j-1))
     if neighbours:
+        # we try to move in an available direction.
+        # places its position on a stack and moves to the next cell.
         solve_stack.append((solve_i, solve_j))
         solve_i, solve_j = neighbours[0]
         solve_visited[solve_i][solve_j] = True
     elif solve_stack:
+        # when the mouse runs into a dead end, it backtracks by popping the last position from the stack.
         solve_i, solve_j = solve_stack.pop()
 def draw_path():
     glColor3f(0,0,1)
