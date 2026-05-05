@@ -149,8 +149,8 @@ def main():
         if not generating:
             draw_path()
             if solving:
-                draw_mouse(solve_i, solve_j, (1,0,0))
+                draw_mouse(solve_i, solve_j, (0,1,0))
         pygame.display.flip()
-        clock.tick(20)
+        clock.tick(40)
 if __name__ == "__main__":
     main()
